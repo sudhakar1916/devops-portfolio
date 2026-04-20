@@ -1,20 +1,18 @@
 from flask import Flask
-app = Flask(__name__)
+import redis
 
-# In-memory counter (we'll replace with Redis later)
-visit_count = 0
+app = Flask(__name__)
+r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
 
 @app.route('/')
 def home():
-    global visit_count
-    visit_count += 1
-    return f"🚀 Day 2: Simple Flask Visit Counter<br><h1>You are visitor #{visit_count}!</h1>"
+    count = r.incr('visits')
+    return f"🚀 Day 3: Simple Flask Visit Counter (with Redis!)<br><h1>You are visitor #{count}!</h1>"
 
 @app.route('/reset')
 def reset():
-    global visit_count
-    visit_count = 0
-    return "✅ Counter has been reset!"
+    r.delete('visits')
+    return "✅ Counter has been reset to 0!"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
